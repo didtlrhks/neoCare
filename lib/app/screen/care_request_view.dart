@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:neocare/app/screen/care_type_selection_view.dart';
 
-class CareRequestView extends StatelessWidget {
+class CareRequestView extends StatefulWidget {
   const CareRequestView({super.key});
+
+  @override
+  State<CareRequestView> createState() => _CareRequestViewState();
+}
+
+class _CareRequestViewState extends State<CareRequestView> {
+  CareType? selectedCareType;
 
   @override
   Widget build(BuildContext context) {
@@ -25,34 +33,38 @@ class CareRequestView extends StatelessWidget {
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 20),
             child: Text(
-              '어떤 간병이 필요한가요?',
+              '간병 유형을 선택해 주세요.',
               style: TextStyle(
-                fontSize: 24,
+                fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ),
           const SizedBox(height: 24),
-          // 단순간병 옵션
+          // 기간제 옵션
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: _buildCareOption(
               title: '단순간병',
-              isSelected: false,
+              isSelected: selectedCareType == CareType.longTerm,
               onTap: () {
-                Get.snackbar('알림', '단순간병을 선택하셨습니다');
+                setState(() {
+                  selectedCareType = CareType.longTerm;
+                });
               },
             ),
           ),
-          const SizedBox(height: 20),
-          // 전문간병 옵션
+          const SizedBox(height: 16),
+          // 시간제 옵션
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: _buildCareOption(
               title: '전문간병\n(자격증 소지자)',
-              isSelected: false,
+              isSelected: selectedCareType == CareType.shortTerm,
               onTap: () {
-                Get.snackbar('알림', '전문간병을 선택하셨습니다');
+                setState(() {
+                  selectedCareType = CareType.shortTerm;
+                });
               },
             ),
           ),
@@ -62,14 +74,19 @@ class CareRequestView extends StatelessWidget {
             padding: const EdgeInsets.all(20),
             child: SizedBox(
               width: double.infinity,
-              height: 50,
+              height: 55,
               child: ElevatedButton(
-                onPressed: () {
-                  Get.snackbar('알림', '다음 단계로 이동합니다');
-                },
+                onPressed: selectedCareType != null
+                    ? () {
+                        Get.to(() => const CareTypeSelectionView());
+                      }
+                    : null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey[300],
-                  foregroundColor: Colors.black87,
+                  backgroundColor: selectedCareType != null
+                      ? Colors.black
+                      : Colors.grey[300],
+                  foregroundColor:
+                      selectedCareType != null ? Colors.white : Colors.black38,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(4),
                   ),
@@ -98,37 +115,32 @@ class CareRequestView extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey.shade300),
+          border: Border.all(
+            color: isSelected ? Colors.black : Colors.grey.shade300,
+            width: isSelected ? 2 : 1,
+          ),
           borderRadius: BorderRadius.circular(4),
+          color: Colors.white,
         ),
         child: Row(
           children: [
             SizedBox(
-              width: 40,
-              height: 40,
+              width: 24,
+              height: 24,
               child: Image.asset(
                 'assets/images/carrot.png',
-                errorBuilder: (context, error, stackTrace) {
-                  print("이미지 로드 오류: $error");
-                  return Icon(
-                    Icons.eco,
-                    size: 40,
-                    color: Colors.orange.shade200,
-                  );
-                },
+                color: isSelected ? Colors.black : Colors.grey.shade400,
               ),
             ),
             const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.black54,
-                ),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                color: isSelected ? Colors.black : Colors.grey.shade400,
               ),
             ),
           ],
@@ -136,4 +148,9 @@ class CareRequestView extends StatelessWidget {
       ),
     );
   }
+}
+
+enum CareType {
+  longTerm,
+  shortTerm,
 }
