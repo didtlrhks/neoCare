@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'care_request_view.dart';
 
 class GuardianHomeView extends StatelessWidget {
   const GuardianHomeView({super.key});
@@ -43,7 +44,8 @@ class GuardianHomeView extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: ElevatedButton(
                 onPressed: () {
-                  Get.snackbar('알림', '간병 요청 페이지로 이동합니다');
+                  // CareRequestView로 이동
+                  Get.to(() => const CareRequestView());
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF6960AD),
