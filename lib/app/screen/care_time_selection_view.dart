@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'care_location_view.dart';
 
 class CareTimeSelectionView extends StatefulWidget {
   const CareTimeSelectionView({super.key});
@@ -148,8 +149,7 @@ class _CareTimeSelectionViewState extends State<CareTimeSelectionView> {
               child: ElevatedButton(
                 onPressed: (startTime != null && endTime != null)
                     ? () {
-                        // TODO: 다음 단계로 이동
-                        Get.snackbar('알림', '간병 시간이 선택되었습니다');
+                        Get.to(() => const CareLocationView());
                       }
                     : null,
                 style: ElevatedButton.styleFrom(
