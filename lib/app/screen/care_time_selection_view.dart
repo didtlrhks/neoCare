@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'care_time_selection_view.dart';
 
-class CarePeriodSelectionView extends StatefulWidget {
-  const CarePeriodSelectionView({super.key});
+class CareTimeSelectionView extends StatefulWidget {
+  const CareTimeSelectionView({super.key});
 
   @override
-  State<CarePeriodSelectionView> createState() =>
-      _CarePeriodSelectionViewState();
+  State<CareTimeSelectionView> createState() => _CareTimeSelectionViewState();
 }
 
-class _CarePeriodSelectionViewState extends State<CarePeriodSelectionView> {
-  DateTime? startDate;
-  DateTime? endDate;
+class _CareTimeSelectionViewState extends State<CareTimeSelectionView> {
+  TimeOfDay? startTime;
+  TimeOfDay? endTime;
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +33,7 @@ class _CarePeriodSelectionViewState extends State<CarePeriodSelectionView> {
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 20),
             child: Text(
-              '간병 기간을 선택해 주세요.',
+              '돌봄 시간을 선택해 주세요.',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -43,14 +41,14 @@ class _CarePeriodSelectionViewState extends State<CarePeriodSelectionView> {
             ),
           ),
           const SizedBox(height: 24),
-          // 시작일
+          // 시작 시간
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  '시작일',
+                  '시작 시간',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
@@ -58,7 +56,7 @@ class _CarePeriodSelectionViewState extends State<CarePeriodSelectionView> {
                 ),
                 const SizedBox(height: 8),
                 GestureDetector(
-                  onTap: () => _selectDate(context, isStart: true),
+                  onTap: () => _selectTime(context, isStart: true),
                   child: Container(
                     width: double.infinity,
                     height: 55,
@@ -71,18 +69,16 @@ class _CarePeriodSelectionViewState extends State<CarePeriodSelectionView> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          startDate != null
-                              ? '${startDate!.year}.${startDate!.month.toString().padLeft(2, '0')}.${startDate!.day.toString().padLeft(2, '0')}'
-                              : '',
+                          startTime != null ? _formatTime(startTime!) : '',
                           style: TextStyle(
                             fontSize: 16,
-                            color: startDate != null
+                            color: startTime != null
                                 ? Colors.black
                                 : Colors.grey.shade400,
                           ),
                         ),
                         Icon(
-                          Icons.calendar_today_outlined,
+                          Icons.access_time,
                           color: Colors.grey.shade400,
                           size: 20,
                         ),
@@ -94,14 +90,14 @@ class _CarePeriodSelectionViewState extends State<CarePeriodSelectionView> {
             ),
           ),
           const SizedBox(height: 24),
-          // 종료일
+          // 종료 시간
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  '종료일',
+                  '종료 시간',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
@@ -109,7 +105,7 @@ class _CarePeriodSelectionViewState extends State<CarePeriodSelectionView> {
                 ),
                 const SizedBox(height: 8),
                 GestureDetector(
-                  onTap: () => _selectDate(context, isStart: false),
+                  onTap: () => _selectTime(context, isStart: false),
                   child: Container(
                     width: double.infinity,
                     height: 55,
@@ -122,18 +118,16 @@ class _CarePeriodSelectionViewState extends State<CarePeriodSelectionView> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          endDate != null
-                              ? '${endDate!.year}.${endDate!.month.toString().padLeft(2, '0')}.${endDate!.day.toString().padLeft(2, '0')}'
-                              : '',
+                          endTime != null ? _formatTime(endTime!) : '',
                           style: TextStyle(
                             fontSize: 16,
-                            color: endDate != null
+                            color: endTime != null
                                 ? Colors.black
                                 : Colors.grey.shade400,
                           ),
                         ),
                         Icon(
-                          Icons.calendar_today_outlined,
+                          Icons.access_time,
                           color: Colors.grey.shade400,
                           size: 20,
                         ),
@@ -152,16 +146,17 @@ class _CarePeriodSelectionViewState extends State<CarePeriodSelectionView> {
               width: double.infinity,
               height: 55,
               child: ElevatedButton(
-                onPressed: (startDate != null && endDate != null)
+                onPressed: (startTime != null && endTime != null)
                     ? () {
-                        Get.to(() => const CareTimeSelectionView());
+                        // TODO: 다음 단계로 이동
+                        Get.snackbar('알림', '간병 시간이 선택되었습니다');
                       }
                     : null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: (startDate != null && endDate != null)
+                  backgroundColor: (startTime != null && endTime != null)
                       ? Colors.black
                       : Colors.grey.shade200,
-                  foregroundColor: (startDate != null && endDate != null)
+                  foregroundColor: (startTime != null && endTime != null)
                       ? Colors.white
                       : Colors.grey.shade400,
                   shape: RoundedRectangleBorder(
@@ -183,13 +178,11 @@ class _CarePeriodSelectionViewState extends State<CarePeriodSelectionView> {
     );
   }
 
-  Future<void> _selectDate(BuildContext context,
+  Future<void> _selectTime(BuildContext context,
       {required bool isStart}) async {
-    final DateTime? picked = await showDatePicker(
+    final TimeOfDay? picked = await showTimePicker(
       context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime(2025, 12),
+      initialTime: TimeOfDay.now(),
       builder: (context, child) {
         return Theme(
           data: ThemeData.light().copyWith(
@@ -208,20 +201,39 @@ class _CarePeriodSelectionViewState extends State<CarePeriodSelectionView> {
     if (picked != null) {
       setState(() {
         if (isStart) {
-          startDate = picked;
-          // 시작일이 종료일보다 뒤라면 종료일도 같은 날짜로 설정
-          if (endDate != null && startDate!.isAfter(endDate!)) {
-            endDate = startDate;
+          startTime = picked;
+          // 시작 시간이 종료 시간보다 뒤라면, 적절한 처리
+          if (endTime != null && _isTimeAfter(startTime!, endTime!)) {
+            endTime = null; // 종료 시간 초기화
           }
         } else {
-          // 종료일이 시작일보다 앞이면 선택 불가
-          if (startDate != null && picked.isBefore(startDate!)) {
-            Get.snackbar('알림', '종료일은 시작일 이후여야 합니다');
+          // 종료 시간이 시작 시간보다 앞이면 선택 불가
+          if (startTime != null && _isTimeBefore(picked, startTime!)) {
+            Get.snackbar('알림', '종료 시간은 시작 시간 이후여야 합니다');
             return;
           }
-          endDate = picked;
+          endTime = picked;
         }
       });
     }
+  }
+
+  // 시간 포맷팅 함수
+  String _formatTime(TimeOfDay time) {
+    final hour = time.hour.toString().padLeft(2, '0');
+    final minute = time.minute.toString().padLeft(2, '0');
+    return '$hour:$minute';
+  }
+
+  // 시간 비교 함수: time1이 time2보다 이후인지
+  bool _isTimeAfter(TimeOfDay time1, TimeOfDay time2) {
+    return time1.hour > time2.hour ||
+        (time1.hour == time2.hour && time1.minute > time2.minute);
+  }
+
+  // 시간 비교 함수: time1이 time2보다 이전인지
+  bool _isTimeBefore(TimeOfDay time1, TimeOfDay time2) {
+    return time1.hour < time2.hour ||
+        (time1.hour == time2.hour && time1.minute < time2.minute);
   }
 }
