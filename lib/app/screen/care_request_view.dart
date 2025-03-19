@@ -45,7 +45,7 @@ class _CareRequestViewState extends State<CareRequestView> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: _buildCareOption(
-              title: '단순간병',
+              title: '기간제(상주)',
               isSelected: selectedCareType == CareType.longTerm,
               onTap: () {
                 setState(() {
@@ -59,7 +59,7 @@ class _CareRequestViewState extends State<CareRequestView> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: _buildCareOption(
-              title: '전문간병\n(자격증 소지자)',
+              title: '시간제',
               isSelected: selectedCareType == CareType.shortTerm,
               onTap: () {
                 setState(() {

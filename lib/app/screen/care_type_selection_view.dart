@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'care_period_selection_view.dart';
 
-class CareTypeSelectionView extends StatelessWidget {
+class CareTypeSelectionView extends StatefulWidget {
   const CareTypeSelectionView({super.key});
+
+  @override
+  State<CareTypeSelectionView> createState() => _CareTypeSelectionViewState();
+}
+
+class _CareTypeSelectionViewState extends State<CareTypeSelectionView> {
+  String? selectedType;
 
   @override
   Widget build(BuildContext context) {
@@ -33,34 +41,56 @@ class CareTypeSelectionView extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 24),
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              children: [
-                _buildCareTypeOption(
-                  title: '기간제(상주)',
-                  icon: 'assets/images/carrot.png',
-                ),
-                const SizedBox(height: 16),
-                _buildCareTypeOption(
-                  title: '시간제',
-                  icon: 'assets/images/carrot.png',
-                ),
-              ],
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  selectedType = '기간제(상주)';
+                });
+              },
+              child: _buildCareTypeOption(
+                title: '기간제(상주)',
+                icon: 'assets/images/carrot.png',
+                isSelected: selectedType == '기간제(상주)',
+              ),
             ),
           ),
+          const SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  selectedType = '시간제';
+                });
+              },
+              child: _buildCareTypeOption(
+                title: '시간제',
+                icon: 'assets/images/carrot.png',
+                isSelected: selectedType == '시간제',
+              ),
+            ),
+          ),
+          const Spacer(),
           Padding(
             padding: const EdgeInsets.all(20),
             child: SizedBox(
               width: double.infinity,
               height: 55,
               child: ElevatedButton(
-                onPressed: () {
-                  // TODO: 다음 단계로 이동
-                },
+                onPressed: selectedType != null
+                    ? () {
+                        Get.to(() => const CarePeriodSelectionView());
+                      }
+                    : null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black,
-                  foregroundColor: Colors.white,
+                  backgroundColor: selectedType != null
+                      ? Colors.black
+                      : Colors.grey.shade200,
+                  foregroundColor: selectedType != null
+                      ? Colors.white
+                      : Colors.grey.shade400,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(4),
                   ),
@@ -83,12 +113,16 @@ class CareTypeSelectionView extends StatelessWidget {
   Widget _buildCareTypeOption({
     required String title,
     required String icon,
+    required bool isSelected,
   }) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(
+          color: isSelected ? Colors.black : Colors.grey.shade200,
+          width: isSelected ? 2 : 1,
+        ),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Row(
@@ -98,7 +132,7 @@ class CareTypeSelectionView extends StatelessWidget {
             height: 24,
             child: Image.asset(
               icon,
-              color: Colors.grey.shade400,
+              color: isSelected ? Colors.black : Colors.grey.shade400,
             ),
           ),
           const SizedBox(width: 12),
@@ -106,7 +140,8 @@ class CareTypeSelectionView extends StatelessWidget {
             title,
             style: TextStyle(
               fontSize: 16,
-              color: Colors.grey.shade400,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              color: isSelected ? Colors.black : Colors.grey.shade400,
             ),
           ),
         ],
