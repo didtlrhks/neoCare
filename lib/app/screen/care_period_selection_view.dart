@@ -3,7 +3,9 @@ import 'package:get/get.dart';
 import 'care_time_selection_view.dart';
 
 class CarePeriodSelectionView extends StatefulWidget {
-  const CarePeriodSelectionView({super.key});
+  final Map<String, dynamic>? careData;
+
+  const CarePeriodSelectionView({super.key, this.careData});
 
   @override
   State<CarePeriodSelectionView> createState() =>
@@ -154,7 +156,21 @@ class _CarePeriodSelectionViewState extends State<CarePeriodSelectionView> {
               child: ElevatedButton(
                 onPressed: (startDate != null && endDate != null)
                     ? () {
-                        Get.to(() => const CareTimeSelectionView());
+                        // 날짜 포맷팅
+                        final String formattedStartDate =
+                            '${startDate!.year}.${startDate!.month.toString().padLeft(2, '0')}.${startDate!.day.toString().padLeft(2, '0')}';
+                        final String formattedEndDate =
+                            '${endDate!.year}.${endDate!.month.toString().padLeft(2, '0')}.${endDate!.day.toString().padLeft(2, '0')}';
+
+                        // 이전 데이터에 기간 정보 추가
+                        final Map<String, dynamic> updatedCareData = {
+                          ...widget.careData ?? {},
+                          'startDate': formattedStartDate,
+                          'endDate': formattedEndDate,
+                        };
+
+                        Get.to(() =>
+                            CareTimeSelectionView(careData: updatedCareData));
                       }
                     : null,
                 style: ElevatedButton.styleFrom(

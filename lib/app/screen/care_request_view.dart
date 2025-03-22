@@ -78,7 +78,17 @@ class _CareRequestViewState extends State<CareRequestView> {
               child: ElevatedButton(
                 onPressed: selectedCareType != null
                     ? () {
-                        Get.to(() => const CareTypeSelectionView());
+                        final String careTypeName =
+                            selectedCareType == CareType.longTerm
+                                ? '기간제(상주)'
+                                : '시간제';
+
+                        final Map<String, dynamic> careData = {
+                          'careType': careTypeName,
+                          'isActive': true,
+                        };
+
+                        Get.to(() => CareTypeSelectionView(careData: careData));
                       }
                     : null,
                 style: ElevatedButton.styleFrom(

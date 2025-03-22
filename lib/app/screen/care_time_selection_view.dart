@@ -3,7 +3,9 @@ import 'package:get/get.dart';
 import 'care_location_view.dart';
 
 class CareTimeSelectionView extends StatefulWidget {
-  const CareTimeSelectionView({super.key});
+  final Map<String, dynamic>? careData;
+
+  const CareTimeSelectionView({super.key, this.careData});
 
   @override
   State<CareTimeSelectionView> createState() => _CareTimeSelectionViewState();
@@ -149,7 +151,15 @@ class _CareTimeSelectionViewState extends State<CareTimeSelectionView> {
               child: ElevatedButton(
                 onPressed: (startTime != null && endTime != null)
                     ? () {
-                        Get.to(() => const CareLocationView());
+                        // 이전 데이터에 시간 정보 추가하여 다음 페이지로 전달
+                        final Map<String, dynamic> updatedCareData = {
+                          ...widget.careData ?? {},
+                          'startTime': _formatTime(startTime!),
+                          'endTime': _formatTime(endTime!),
+                        };
+
+                        Get.to(
+                            () => CareLocationView(careData: updatedCareData));
                       }
                     : null,
                 style: ElevatedButton.styleFrom(

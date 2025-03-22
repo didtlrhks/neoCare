@@ -3,7 +3,9 @@ import 'package:get/get.dart';
 import 'care_period_selection_view.dart';
 
 class CareTypeSelectionView extends StatefulWidget {
-  const CareTypeSelectionView({super.key});
+  final Map<String, dynamic>? careData;
+
+  const CareTypeSelectionView({super.key, this.careData});
 
   @override
   State<CareTypeSelectionView> createState() => _CareTypeSelectionViewState();
@@ -81,7 +83,14 @@ class _CareTypeSelectionViewState extends State<CareTypeSelectionView> {
               child: ElevatedButton(
                 onPressed: selectedType != null
                     ? () {
-                        Get.to(() => const CarePeriodSelectionView());
+                        // 이전 데이터에 세부 간병 유형 정보 추가
+                        final Map<String, dynamic> updatedCareData = {
+                          ...widget.careData ?? {},
+                          'detailedCareType': selectedType,
+                        };
+
+                        Get.to(() =>
+                            CarePeriodSelectionView(careData: updatedCareData));
                       }
                     : null,
                 style: ElevatedButton.styleFrom(

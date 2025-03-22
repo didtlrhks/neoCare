@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'patient_info_view.dart';
 
 class CareLocationView extends StatefulWidget {
-  const CareLocationView({super.key});
+  final Map<String, dynamic>? careData;
+
+  const CareLocationView({super.key, this.careData});
 
   @override
   State<CareLocationView> createState() => _CareLocationViewState();
 }
 
 class _CareLocationViewState extends State<CareLocationView> {
-  final TextEditingController _searchController = TextEditingController();
+  final TextEditingController _addressController = TextEditingController();
   final TextEditingController _detailAddressController =
       TextEditingController();
   bool _isNextEnabled = false;
@@ -17,22 +20,24 @@ class _CareLocationViewState extends State<CareLocationView> {
   @override
   void initState() {
     super.initState();
-    _searchController.addListener(_checkInputs);
+    _addressController.addListener(_checkInputs);
     _detailAddressController.addListener(_checkInputs);
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    _detailAddressController.dispose();
-    super.dispose();
   }
 
   void _checkInputs() {
     setState(() {
-      _isNextEnabled = _searchController.text.isNotEmpty &&
+      _isNextEnabled = _addressController.text.isNotEmpty &&
           _detailAddressController.text.isNotEmpty;
     });
+  }
+
+  @override
+  void dispose() {
+    _addressController.removeListener(_checkInputs);
+    _detailAddressController.removeListener(_checkInputs);
+    _addressController.dispose();
+    _detailAddressController.dispose();
+    super.dispose();
   }
 
   @override
@@ -56,7 +61,7 @@ class _CareLocationViewState extends State<CareLocationView> {
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 20),
             child: Text(
-              '간병장소는 어디인가요?',
+              '간병을 제공받을 위치를 입력해 주세요.',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -67,61 +72,86 @@ class _CareLocationViewState extends State<CareLocationView> {
           // 주소 검색
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
               children: [
-                Container(
-                  width: double.infinity,
-                  height: 55,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade100,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
+                Expanded(
                   child: TextField(
-                    controller: _searchController,
+                    controller: _addressController,
                     decoration: InputDecoration(
                       hintText: '주소 검색',
-                      hintStyle: TextStyle(color: Colors.grey.shade500),
-                      border: InputBorder.none,
+                      hintStyle: TextStyle(color: Colors.grey.shade400),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(4),
+                        borderSide: BorderSide(color: Colors.grey.shade200),
+                      ),
                       contentPadding:
                           const EdgeInsets.symmetric(horizontal: 16),
-                      suffixIcon: Icon(
-                        Icons.search,
-                        color: Colors.grey.shade500,
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(4),
+                        borderSide: BorderSide(color: Colors.grey.shade200),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(4),
+                        borderSide: BorderSide(color: Colors.grey.shade400),
                       ),
                     ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                SizedBox(
+                  height: 55,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      // 주소 검색 로직 구현
+                      _addressController.text = '서울시 강남구 역삼동 123';
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    child: const Text('검색'),
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
           // 상세 주소
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20),
+            child: Text(
+              '상세 주소',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: double.infinity,
-                  height: 55,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(4),
-                    border: Border.all(color: Colors.grey.shade300),
-                  ),
-                  child: TextField(
-                    controller: _detailAddressController,
-                    decoration: InputDecoration(
-                      hintText: '상세 주소를 입력해 주세요',
-                      hintStyle: TextStyle(color: Colors.grey.shade400),
-                      border: InputBorder.none,
-                      contentPadding:
-                          const EdgeInsets.symmetric(horizontal: 16),
-                    ),
-                  ),
+            child: TextField(
+              controller: _detailAddressController,
+              decoration: InputDecoration(
+                hintText: '상세 주소 입력',
+                hintStyle: TextStyle(color: Colors.grey.shade400),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(4),
+                  borderSide: BorderSide(color: Colors.grey.shade200),
                 ),
-              ],
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(4),
+                  borderSide: BorderSide(color: Colors.grey.shade200),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(4),
+                  borderSide: BorderSide(color: Colors.grey.shade400),
+                ),
+              ),
             ),
           ),
           const Spacer(),
@@ -134,8 +164,15 @@ class _CareLocationViewState extends State<CareLocationView> {
               child: ElevatedButton(
                 onPressed: _isNextEnabled
                     ? () {
-                        // TODO: 다음 단계로 이동
-                        Get.snackbar('알림', '간병 장소가 선택되었습니다');
+                        // 이전 페이지에서 받은 데이터와 현재 페이지의 데이터 병합
+                        final Map<String, dynamic> updatedCareData = {
+                          ...widget.careData ?? {},
+                          'address': _addressController.text,
+                          'detailAddress': _detailAddressController.text,
+                        };
+
+                        Get.to(
+                            () => PatientInfoView(careData: updatedCareData));
                       }
                     : null,
                 style: ElevatedButton.styleFrom(
