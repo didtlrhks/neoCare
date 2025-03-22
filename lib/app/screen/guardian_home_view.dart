@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'care_request_view.dart';
 import 'care_detail_view.dart';
+import 'progress_care_view.dart';
 
 class GuardianHomeView extends StatefulWidget {
   final Map<String, dynamic>? careData;
@@ -373,6 +374,181 @@ class _GuardianHomeViewState extends State<GuardianHomeView> {
   }
 
   Widget _buildEmptyCareCard() {
+    // 가장 최근에 결제 완료된 간병 요청 찾기
+    Map<String, dynamic>? activeCare;
+
+    for (var care in GuardianHomeView.allCareRequests) {
+      if (care['isActive'] == true) {
+        activeCare = care;
+        break;
+      }
+    }
+
+    // 진행 중인 간병이 있는 경우
+    if (activeCare != null) {
+      final String careType = activeCare['careType'] ?? '단순간병';
+      final String? startDate = activeCare['startDate'];
+      final String? endDate = activeCare['endDate'];
+      final String? startTime = activeCare['startTime'];
+      final String? endTime = activeCare['endTime'];
+      final String dateRange = '$startDate  ~  $endDate';
+      final String timeRange = '$startTime  ~  $endTime';
+      final String requestId = activeCare['requestId'] ?? '';
+
+      return GestureDetector(
+        onTap: () {
+          // 진행 중인 간병 상세 화면으로 이동
+          Get.to(() => ProgressCareView(requestId: requestId));
+        },
+        child: Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.1),
+                spreadRadius: 1,
+                blurRadius: 3,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF6960AD).withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.medical_services_outlined,
+                            size: 16,
+                            color: Color(0xFF6960AD),
+                          ),
+                          SizedBox(width: 4),
+                          Text(
+                            '진행 중',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF6960AD),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Spacer(),
+                    const Icon(
+                      Icons.arrow_forward_ios,
+                      size: 14,
+                      color: Colors.grey,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  careType,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.calendar_today,
+                      size: 16,
+                      color: Colors.grey,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      dateRange,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.access_time,
+                      size: 16,
+                      color: Colors.grey,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      timeRange,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    const Text(
+                      '간병인',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    const Text(
+                      '유네오',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const Spacer(),
+                    Container(
+                      width: 30,
+                      height: 30,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Color(0xFFF5F5F5),
+                      ),
+                      child: Image.asset(
+                        'assets/images/carrot.png',
+                        width: 20,
+                        height: 20,
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Icon(
+                            Icons.person,
+                            size: 20,
+                            color: Colors.grey,
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // 진행 중인 간병이 없는 경우 기존 빈 카드 표시
     return Container(
       width: double.infinity,
       height: 200,
@@ -580,135 +756,146 @@ class _GuardianHomeViewState extends State<GuardianHomeView> {
   }
 
   Widget _buildCaregiverRecruitmentCard() {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 3,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 시간제 아이콘과 텍스트
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[300],
-                          borderRadius: BorderRadius.circular(50),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.refresh,
-                                size: 16, color: Colors.grey[700]),
-                            const SizedBox(width: 4),
-                            Text(
-                              '시간제',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey[700],
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            Icon(Icons.chevron_right,
-                                size: 16, color: Colors.grey[700]),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+    // 예시 데이터로 샘플 requestId 생성
+    final String sampleRequestId =
+        "sample_${DateTime.now().millisecondsSinceEpoch}";
 
-                  const SizedBox(height: 16),
-
-                  // 최간병 텍스트
-                  Row(
-                    children: [
-                      Icon(Icons.medical_services_outlined,
-                          size: 20, color: Colors.grey[700]),
-                      const SizedBox(width: 8),
-                      const Text(
-                        '최간병',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  // 날짜
-                  Row(
-                    children: [
-                      Icon(Icons.calendar_today_outlined,
-                          size: 20, color: Colors.grey[700]),
-                      const SizedBox(width: 8),
-                      const Text(
-                        '2024.04.23 ~ 2024.04.23',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 8),
-
-                  // 시간
-                  Row(
-                    children: [
-                      Icon(Icons.access_time,
-                          size: 20, color: Colors.grey[700]),
-                      const SizedBox(width: 8),
-                      const Text(
-                        '07:35 ~ 20:35',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+    return GestureDetector(
+      onTap: () {
+        // 간병인(최간병) 카드 클릭 시 ProgressCareView로 이동
+        // 데이터가 없으므로 샘플 ID를 생성해서 전달
+        Get.to(() => ProgressCareView(requestId: sampleRequestId));
+      },
+      child: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: Colors.grey[50],
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.1),
+              spreadRadius: 1,
+              blurRadius: 3,
+              offset: const Offset(0, 2),
             ),
-          ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 시간제 아이콘과 텍스트
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(50),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.refresh,
+                                  size: 16, color: Colors.grey[700]),
+                              const SizedBox(width: 4),
+                              Text(
+                                '시간제',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey[700],
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              Icon(Icons.chevron_right,
+                                  size: 16, color: Colors.grey[700]),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
 
-          // 오른쪽 이미지 영역
-          Container(
-            width: 40,
-            height: 40,
-            color: Colors.grey[300],
-            child: const Center(
-              child: Text(
-                '40 × 40',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.black54,
+                    const SizedBox(height: 16),
+
+                    // 최간병 텍스트
+                    Row(
+                      children: [
+                        Icon(Icons.medical_services_outlined,
+                            size: 20, color: Colors.grey[700]),
+                        const SizedBox(width: 8),
+                        const Text(
+                          '최간병',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    // 날짜
+                    Row(
+                      children: [
+                        Icon(Icons.calendar_today_outlined,
+                            size: 20, color: Colors.grey[700]),
+                        const SizedBox(width: 8),
+                        const Text(
+                          '2024.04.23 ~ 2024.04.23',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    // 시간
+                    Row(
+                      children: [
+                        Icon(Icons.access_time,
+                            size: 20, color: Colors.grey[700]),
+                        const SizedBox(width: 8),
+                        const Text(
+                          '07:35 ~ 20:35',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ),
-          ),
-        ],
+
+            // 오른쪽 이미지 영역
+            Container(
+              width: 40,
+              height: 40,
+              color: Colors.grey[300],
+              child: const Center(
+                child: Text(
+                  '40 × 40',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.black54,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

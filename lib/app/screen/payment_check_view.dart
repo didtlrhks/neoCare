@@ -123,19 +123,28 @@ class PaymentCheckView extends StatelessWidget {
   // 간병 요청 삭제 메서드
   void _removeCareRequest() {
     // 디버그 로그 추가
-    debugPrint('결제 완료: 요청 ID $requestId 삭제 시도');
-    debugPrint('삭제 전 요청 수: ${GuardianHomeView.allCareRequests.length}');
+    debugPrint('결제 완료: 요청 ID $requestId 활성화 시도');
 
-    // 해당 ID의 요청 삭제
-    GuardianHomeView.allCareRequests
-        .removeWhere((careData) => careData['requestId'] == requestId);
+    // 해당 ID의 요청을 찾아 isActive를 true로 설정
+    bool foundRequest = false;
+    for (var i = 0; i < GuardianHomeView.allCareRequests.length; i++) {
+      if (GuardianHomeView.allCareRequests[i]['requestId'] == requestId) {
+        // 요청을 찾았으면 isActive 상태를 true로 변경
+        GuardianHomeView.allCareRequests[i]['isActive'] = true;
+        foundRequest = true;
+        debugPrint('요청 ID $requestId 활성화 완료');
+        break;
+      }
+    }
 
-    debugPrint('삭제 후 요청 수: ${GuardianHomeView.allCareRequests.length}');
+    if (!foundRequest) {
+      debugPrint('요청 ID $requestId를 찾을 수 없음');
+    }
 
-    // 삭제 완료 알림
+    // 결제 완료 알림
     Get.snackbar(
       '결제 완료',
-      '간병 요청이 완료되었습니다.',
+      '간병 서비스가 시작되었습니다.',
       snackPosition: SnackPosition.BOTTOM,
       duration: const Duration(seconds: 2),
     );
