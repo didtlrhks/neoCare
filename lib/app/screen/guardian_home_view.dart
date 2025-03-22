@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'care_request_view.dart';
+import 'care_detail_view.dart';
 
 class GuardianHomeView extends StatefulWidget {
   final Map<String, dynamic>? careData;
@@ -310,7 +311,15 @@ class _GuardianHomeViewState extends State<GuardianHomeView> {
                 .map((careData) => Padding(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 20, vertical: 10),
-                      child: _buildActiveCareCard(careData),
+                      child: GestureDetector(
+                        onTap: () {
+                          // 클릭 시 상세 페이지로 이동
+                          Get.to(() => CareDetailView(
+                                requestId: careData['requestId'] ?? '',
+                              ));
+                        },
+                        child: _buildActiveCareCard(careData),
+                      ),
                     ))
                 .toList())
           else
@@ -546,6 +555,22 @@ class _GuardianHomeViewState extends State<GuardianHomeView> {
                     color: Colors.black87,
                   ),
                 ),
+              ],
+            ),
+            // 상세 보기 안내
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Text(
+                  '상세 보기',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[700],
+                  ),
+                ),
+                Icon(Icons.arrow_forward_ios,
+                    size: 14, color: Colors.grey[700]),
               ],
             ),
           ],
