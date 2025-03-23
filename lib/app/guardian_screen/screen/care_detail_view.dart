@@ -292,29 +292,6 @@ class _CareDetailViewState extends State<CareDetailView> {
 
             const SizedBox(height: 20),
 
-            // 견적보기 버튼
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: _showQuotationView,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-                child: const Text(
-                  '견적보기',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-
             // 결제 진행 버튼
             SizedBox(
               width: double.infinity,

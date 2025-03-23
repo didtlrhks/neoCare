@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'care_request_view.dart';
 import 'care_detail_view.dart';
 import 'progress_care_view.dart';
+import 'name_change_view.dart';
 
 class GuardianHomeView extends StatefulWidget {
   final Map<String, dynamic>? careData;
@@ -19,6 +20,9 @@ class GuardianHomeView extends StatefulWidget {
 class _GuardianHomeViewState extends State<GuardianHomeView> {
   int _currentIndex = 0;
   Map<String, dynamic>? _careData;
+
+  // 사용자 이름을 저장하는 변수
+  final RxString userName = '김네오'.obs;
 
   @override
   void initState() {
@@ -356,199 +360,609 @@ class _GuardianHomeViewState extends State<GuardianHomeView> {
   }
 
   Widget _buildNotificationView() {
-    return const Center(
-      child: Text(
-        '알림 화면',
-        style: TextStyle(fontSize: 24),
+    // 자동/수동 설정을 위한 상태 변수
+    final RxBool isAutoDeleteEnabled = true.obs;
+
+    return Column(
+      children: [
+        // 상단 알림 설정 안내 부분
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          color: Colors.white,
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  const Text(
+                    '알림',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const Spacer(),
+                  // 자동/수동 토글 버튼
+                  Obx(() => Row(
+                        children: [
+                          Text(
+                            isAutoDeleteEnabled.value ? '자동' : '수동',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500,
+                              color: isAutoDeleteEnabled.value
+                                  ? Colors.teal[600]
+                                  : Colors.grey[600],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Switch(
+                            value: isAutoDeleteEnabled.value,
+                            onChanged: (value) {
+                              isAutoDeleteEnabled.value = value;
+                            },
+                            activeColor: Colors.teal[600],
+                            activeTrackColor: Colors.teal[100],
+                          ),
+                        ],
+                      )),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Obx(() => RichText(
+                      text: TextSpan(
+                        style: const TextStyle(
+                            color: Colors.black87, fontSize: 14, height: 1.4),
+                        children: [
+                          const TextSpan(
+                            text: '알림 설정이 ',
+                          ),
+                          TextSpan(
+                            text: isAutoDeleteEnabled.value ? '자동' : '수동',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: isAutoDeleteEnabled.value
+                                  ? Colors.teal[600]
+                                  : Colors.grey[800],
+                            ),
+                          ),
+                          const TextSpan(
+                            text: '으로 설정되어 있을 경우\n7일이 지난 알림은 ',
+                          ),
+                          const TextSpan(
+                            text: '자동 삭제',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          const TextSpan(
+                            text: ' 됩니다.',
+                          ),
+                        ],
+                      ),
+                    )),
+              ),
+            ],
+          ),
+        ),
+
+        // 구분선
+        Container(
+          height: 8,
+          color: Colors.grey[100],
+        ),
+
+        // 알림 목록 (스크롤 가능)
+        Expanded(
+          child: ListView(
+            children: [
+              // 간병노트 알림
+              _buildNotificationItem(
+                icon: Icons.assignment_outlined,
+                title: '간병노트',
+                message: '2024년 04월 20일 간병노트가 등록되었습니다.',
+                time: '1시간 전',
+                onDelete: () {
+                  // 삭제 기능 구현
+                  Get.snackbar('알림', '간병노트 알림이 삭제되었습니다.',
+                      snackPosition: SnackPosition.BOTTOM);
+                },
+              ),
+
+              // 구분선
+              Divider(height: 1, thickness: 1, color: Colors.grey[200]),
+
+              // 받은견적 알림
+              _buildNotificationItem(
+                icon: Icons.article_outlined,
+                title: '받은견적',
+                message: '김네오 님이 견적을 보냈습니다.',
+                time: '1시간 전',
+                onDelete: () {
+                  // 삭제 기능 구현
+                  Get.snackbar('알림', '견적 알림이 삭제되었습니다.',
+                      snackPosition: SnackPosition.BOTTOM);
+                },
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  // 알림 아이템 위젯
+  Widget _buildNotificationItem({
+    required IconData icon,
+    required String title,
+    required String message,
+    required String time,
+    required VoidCallback onDelete,
+  }) {
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 아이콘
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(22),
+            ),
+            child: Center(
+              child: Icon(
+                icon,
+                color: Colors.white,
+                size: 24,
+              ),
+            ),
+          ),
+
+          const SizedBox(width: 12),
+
+          // 제목과 메시지
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  message,
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: Colors.grey[800],
+                    height: 1.3,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // 오른쪽 시간과 삭제 버튼 영역
+          const SizedBox(width: 10),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              // 시간 표시
+              Text(
+                time,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey[500],
+                ),
+              ),
+
+              const SizedBox(height: 8),
+
+              // 삭제 버튼
+              InkWell(
+                onTap: onDelete,
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Text(
+                    '삭제',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildProfileView() {
-    return const Center(
-      child: Text(
-        '내 정보 화면',
-        style: TextStyle(fontSize: 24),
+    return SafeArea(
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 프로필 섹션
+            Container(
+              color: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // 상단 제목
+                  const Padding(
+                    padding: EdgeInsets.only(bottom: 24),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          '내 정보',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // 프로필 사진
+                  Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.grey[100],
+                      border: Border.all(color: Colors.grey.shade200, width: 1),
+                    ),
+                    child: Center(
+                      child: Image.asset(
+                        'assets/images/carrot.png',
+                        width: 60,
+                        height: 60,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Icon(
+                            Icons.person,
+                            size: 40,
+                            color: Colors.grey[400],
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // 사용자 이름
+                  Obx(() => Text(
+                        userName.value,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      )),
+
+                  const SizedBox(height: 6),
+
+                  // 사용자 이메일 또는 기타 정보
+                  Text(
+                    '일반 사용자',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // 프로필 수정 버튼
+                  OutlinedButton(
+                    onPressed: () {
+                      // 프로필 수정 화면으로 이동
+                      Get.to(() => NameChangeView(
+                            initialName: userName.value,
+                            onNameChanged: (newName) {
+                              userName.value = newName;
+                            },
+                          ));
+                    },
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(color: Colors.grey.shade300),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 12),
+                    ),
+                    child: Text(
+                      '프로필 수정',
+                      style: TextStyle(
+                        color: Colors.grey[800],
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 8),
+
+            // 설정 섹션
+            Container(
+              color: Colors.white,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding:
+                        const EdgeInsets.only(left: 20, top: 16, bottom: 8),
+                    child: Text(
+                      '계정 설정',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ),
+
+                  // 계정 설정 옵션들
+                  _buildSettingItem(
+                    icon: Icons.phone_outlined,
+                    title: '연락처',
+                    subtitle: '010-9876-5432',
+                    onTap: () {
+                      Get.snackbar('알림', '연락처 변경 기능은 준비 중입니다.',
+                          snackPosition: SnackPosition.BOTTOM);
+                    },
+                  ),
+
+                  _buildDivider(),
+
+                  _buildSettingItem(
+                    icon: Icons.lock_outline,
+                    title: '비밀번호 변경',
+                    onTap: () {
+                      Get.snackbar('알림', '비밀번호 변경 기능은 준비 중입니다.',
+                          snackPosition: SnackPosition.BOTTOM);
+                    },
+                  ),
+
+                  const SizedBox(height: 16),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 8),
+
+            // 이용 내역 섹션
+            Container(
+              color: Colors.white,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding:
+                        const EdgeInsets.only(left: 20, top: 16, bottom: 8),
+                    child: Text(
+                      '서비스 이용',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ),
+                  _buildSettingItem(
+                    icon: Icons.history_outlined,
+                    title: '간병인 이용내역',
+                    onTap: () {
+                      Get.snackbar('알림', '간병인 이용내역 기능은 준비 중입니다.',
+                          snackPosition: SnackPosition.BOTTOM);
+                    },
+                  ),
+                  _buildDivider(),
+                  _buildSettingItem(
+                    icon: Icons.settings_outlined,
+                    title: '설정',
+                    onTap: () {
+                      Get.snackbar('알림', '설정 기능은 준비 중입니다.',
+                          snackPosition: SnackPosition.BOTTOM);
+                    },
+                  ),
+                  _buildDivider(),
+                  _buildSettingItem(
+                    icon: Icons.help_outline,
+                    title: '고객센터',
+                    onTap: () {
+                      Get.snackbar('알림', '고객센터 기능은 준비 중입니다.',
+                          snackPosition: SnackPosition.BOTTOM);
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 8),
+
+            // 앱 정보 섹션
+            Container(
+              color: Colors.white,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding:
+                        const EdgeInsets.only(left: 20, top: 16, bottom: 8),
+                    child: Text(
+                      '앱 정보',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ),
+                  _buildSettingItem(
+                    icon: Icons.info_outline,
+                    title: '앱 버전',
+                    subtitle: '1.0.0',
+                    onTap: () {},
+                    showArrow: false,
+                  ),
+                  _buildDivider(),
+                  _buildSettingItem(
+                    icon: Icons.sync,
+                    title: '탈퇴신청',
+                    titleColor: Colors.red[700],
+                    onTap: () {
+                      Get.snackbar('알림', '탈퇴신청 기능은 준비 중입니다.',
+                          snackPosition: SnackPosition.BOTTOM);
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                ],
+              ),
+            ),
+
+            // 로그아웃 버튼
+            const SizedBox(height: 24),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Get.snackbar('알림', '로그아웃 되었습니다.',
+                        snackPosition: SnackPosition.BOTTOM);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.grey[800],
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      side: BorderSide(color: Colors.grey[300]!),
+                    ),
+                  ),
+                  child: const Text(
+                    '로그아웃',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 32),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDivider() {
+    return Divider(
+      height: 1,
+      thickness: 1,
+      color: Colors.grey[200],
+      indent: 56,
+    );
+  }
+
+  Widget _buildSettingItem({
+    required IconData icon,
+    required String title,
+    String? subtitle,
+    required VoidCallback onTap,
+    Color? titleColor,
+    bool showArrow = true,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        child: Row(
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: Icon(
+                icon,
+                size: 20,
+                color: Colors.grey[700],
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: titleColor ?? Colors.black87,
+                    ),
+                  ),
+                  if (subtitle != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(
+                        subtitle,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            if (showArrow)
+              Icon(
+                Icons.arrow_forward_ios,
+                size: 16,
+                color: Colors.grey[400],
+              ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildEmptyCareCard() {
-    // 가장 최근에 결제 완료된 간병 요청 찾기
-    Map<String, dynamic>? activeCare;
-
-    for (var care in GuardianHomeView.allCareRequests) {
-      if (care['isActive'] == true) {
-        activeCare = care;
-        break;
-      }
-    }
-
-    // 진행 중인 간병이 있는 경우
-    if (activeCare != null) {
-      final String careType = activeCare['careType'] ?? '단순간병';
-      final String? startDate = activeCare['startDate'];
-      final String? endDate = activeCare['endDate'];
-      final String? startTime = activeCare['startTime'];
-      final String? endTime = activeCare['endTime'];
-      final String dateRange = '$startDate  ~  $endDate';
-      final String timeRange = '$startTime  ~  $endTime';
-      final String requestId = activeCare['requestId'] ?? '';
-
-      return GestureDetector(
-        onTap: () {
-          // 진행 중인 간병 상세 화면으로 이동
-          Get.to(() => ProgressCareView(requestId: requestId));
-        },
-        child: Container(
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(10),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
-                spreadRadius: 1,
-                blurRadius: 3,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF6960AD).withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.medical_services_outlined,
-                            size: 16,
-                            color: Color(0xFF6960AD),
-                          ),
-                          SizedBox(width: 4),
-                          Text(
-                            '진행 중',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF6960AD),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const Spacer(),
-                    const Icon(
-                      Icons.arrow_forward_ios,
-                      size: 14,
-                      color: Colors.grey,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  careType,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.calendar_today,
-                      size: 16,
-                      color: Colors.grey,
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      dateRange,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Colors.black87,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.access_time,
-                      size: 16,
-                      color: Colors.grey,
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      timeRange,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Colors.black87,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    const Text(
-                      '간병인',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    const Text(
-                      '유네오',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const Spacer(),
-                    Container(
-                      width: 30,
-                      height: 30,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Color(0xFFF5F5F5),
-                      ),
-                      child: Image.asset(
-                        'assets/images/carrot.png',
-                        width: 20,
-                        height: 20,
-                        errorBuilder: (context, error, stackTrace) {
-                          return const Icon(
-                            Icons.person,
-                            size: 20,
-                            color: Colors.grey,
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    }
-
-    // 진행 중인 간병이 없는 경우 기존 빈 카드 표시
+    // 항상 진행 중인 간병이 없는 상태의 카드 표시
     return Container(
       width: double.infinity,
       height: 200,
