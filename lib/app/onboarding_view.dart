@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:neocare/app/screen/usecase_view.dart';
+import 'package:neocare/app/guardian_screen/usecase_view.dart';
 
 class OnboardingView extends StatelessWidget {
   const OnboardingView({super.key});

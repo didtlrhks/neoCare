@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:neocare/app/screen/care_type_selection_view.dart';
+import 'package:neocare/app/guardian_screen/care_type_selection_view.dart';
 
 class CareRequestView extends StatefulWidget {
   const CareRequestView({super.key});

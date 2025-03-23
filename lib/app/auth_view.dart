@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:neocare/app/screen/findid_view.dart';
+import 'package:neocare/app/guardian_screen/findid_view.dart';
 import 'package:neocare/app/welcome_view.dart';
 
-import 'screen/findpassword_view.dart';
+import 'guardian_screen/findpassword_view.dart';
 
 class AuthView extends StatelessWidget {
   const AuthView({super.key});
