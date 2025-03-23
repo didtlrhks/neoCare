@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'guardian_screen/guardian_home_view.dart';
+import 'caregiver_screen/caregiver_home_view.dart';
 
 class WelcomeView extends StatelessWidget {
   const WelcomeView({super.key});
@@ -46,7 +47,7 @@ class WelcomeView extends StatelessWidget {
                 imagePath: 'assets/images/carrot_blue.png',
                 onTap: () {
                   // 간병인 화면으로 이동
-                  Get.snackbar('알림', '간병인 화면으로 이동합니다');
+                  Get.off(() => const CaregiverHomeView());
                 },
               ),
               const Spacer(),
