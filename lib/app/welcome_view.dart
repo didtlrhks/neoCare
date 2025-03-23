@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'guardian_home_view.dart';
+import 'screen/guardian_home_view.dart';
 
 class WelcomeView extends StatelessWidget {
   const WelcomeView({super.key});

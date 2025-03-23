@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'app/screen/onboarding_view.dart';
+import 'package:neocare/app/onboarding_view.dart';
 
 void main() {
   runApp(const MyApp());

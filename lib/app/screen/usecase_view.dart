@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'auth_view.dart';
+import '../auth_view.dart';
 
 class UseCaseView extends StatelessWidget {
   const UseCaseView({super.key});
