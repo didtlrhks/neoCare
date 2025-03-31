@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'caregiverinfo_view.dart';
 import 'care_note_write_view.dart';
+import 'caregiver_job_search_view.dart';
+import 'caregiver_notification_view.dart';
+import 'caregiver_profile_view.dart';
 
 class CaregiverHomeView extends StatefulWidget {
   const CaregiverHomeView({super.key});
@@ -11,6 +14,7 @@ class CaregiverHomeView extends StatefulWidget {
 }
 
 class _CaregiverHomeViewState extends State<CaregiverHomeView> {
+  int _selectedIndex = 0;
   final bool _isProfileCompleted = false;
   final List<Map<String, dynamic>> _careRequests = [
     {
@@ -53,6 +57,13 @@ class _CaregiverHomeViewState extends State<CaregiverHomeView> {
     },
   ];
 
+  final List<Widget> _pages = [
+    const _HomePage(),
+    const CaregiverJobSearchView(),
+    const CaregiverNotificationView(),
+    const CaregiverProfileView(),
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -73,81 +84,25 @@ class _CaregiverHomeViewState extends State<CaregiverHomeView> {
           IconButton(
             icon: const Icon(Icons.notifications_outlined, color: Colors.black),
             onPressed: () {
-              // 알림 페이지로 이동
+              setState(() {
+                _selectedIndex = 2;
+              });
             },
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 프로필 요약 정보
-            _buildProfileSummary(),
-
-            const SizedBox(height: 16),
-
-            // 요청 목록 섹션
-            if (_careRequests.isNotEmpty) ...[
-              _buildSectionTitle('새로운 간병 요청'),
-              ListView.builder(
-                physics: const NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                itemCount: _careRequests.length,
-                itemBuilder: (context, index) {
-                  return _buildCareRequestCard(_careRequests[index]);
-                },
-              ),
-            ],
-
-            const SizedBox(height: 16),
-
-            // 진행 중인 간병 섹션
-            if (_ongoingCares.isNotEmpty) ...[
-              _buildSectionTitle('진행 중인 간병'),
-              ListView.builder(
-                physics: const NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                itemCount: _ongoingCares.length,
-                itemBuilder: (context, index) {
-                  return _buildOngoingCareCard(_ongoingCares[index]);
-                },
-              ),
-            ],
-
-            if (_careRequests.isEmpty && _ongoingCares.isEmpty) ...[
-              const SizedBox(height: 100),
-              Center(
-                child: Column(
-                  children: [
-                    Icon(
-                      Icons.medical_services_outlined,
-                      size: 80,
-                      color: Colors.grey[400],
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      '요청 및 진행 중인 간병이 없습니다.',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-
-            const SizedBox(height: 80), // 바텀 네비게이션 여백
-          ],
-        ),
-      ),
+      body: _pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 0,
+        currentIndex: _selectedIndex,
         selectedItemColor: Colors.black,
         unselectedItemColor: Colors.grey,
         showUnselectedLabels: true,
         type: BottomNavigationBarType.fixed,
+        onTap: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home_outlined),
@@ -155,15 +110,126 @@ class _CaregiverHomeViewState extends State<CaregiverHomeView> {
             label: '홈',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.medical_services_outlined),
-            activeIcon: Icon(Icons.medical_services),
-            label: '간병 관리',
+            icon: Icon(Icons.search),
+            activeIcon: Icon(Icons.search),
+            label: '일감찾기',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.notifications_outlined),
+            activeIcon: Icon(Icons.notifications),
+            label: '알림',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),
             activeIcon: Icon(Icons.person),
             label: '내 정보',
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HomePage extends StatelessWidget {
+  const _HomePage();
+
+  final bool _isProfileCompleted = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 프로필 요약 정보
+          _buildProfileSummary(),
+
+          const SizedBox(height: 16),
+
+          // 새로운 간병 요청 탭
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: ElevatedButton(
+              onPressed: () {
+                // 간병 요청 작성 페이지로 이동
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF6960AD),
+                foregroundColor: Colors.white,
+                minimumSize: const Size(double.infinity, 60),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                elevation: 0,
+              ),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.edit_note, size: 28, color: Colors.white),
+                      SizedBox(width: 10),
+                      Text(
+                        '간병요청작성',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Icon(Icons.arrow_forward_ios),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 30),
+
+          // 진행 중인 간병 섹션
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20),
+            child: Text(
+              '진행 중인 간병',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 15),
+
+          // 진행 중인 간병 카드
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: GestureDetector(
+              onTap: () {
+                // 진행 중인 간병 상세 페이지로 이동
+                Get.to(() => const CareNoteWriteView(
+                      careId: '3',
+                      patientName: '이영희',
+                    ));
+              },
+              child: _buildOngoingCareCardNew({
+                'careId': '3',
+                'location': '서울시 송파구 잠실동',
+                'patientName': '이영희',
+                'patientAge': 72,
+                'patientGender': '여성',
+                'careType': '24시간 간병',
+                'startDate': '2024-04-25',
+                'endDate': '2024-05-05',
+                'status': '진행 중',
+                'guardianName': '이진수',
+                'guardianContact': '010-1234-5678',
+              }),
+            ),
+          ),
+
+          const SizedBox(height: 30),
+
+          const SizedBox(height: 80), // 바텀 네비게이션 여백
         ],
       ),
     );
@@ -298,295 +364,178 @@ class _CaregiverHomeViewState extends State<CaregiverHomeView> {
     );
   }
 
-  Widget _buildSectionTitle(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 10),
-      child: Text(
-        title,
-        style: const TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCareRequestCard(Map<String, dynamic> request) {
+  Widget _buildOngoingCareCardNew(Map<String, dynamic> care) {
+    // 시간제 아이콘과 텍스트가 있는 카드
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+      width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 3,
             offset: const Offset(0, 2),
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 카드 헤더
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: const BoxDecoration(
-              border: Border(
-                bottom: BorderSide(color: Color(0xFFEEEEEE), width: 1),
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Row(
               children: [
+                // 시간제 버튼
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(50),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.refresh, size: 16, color: Colors.grey[700]),
+                      const SizedBox(width: 4),
+                      Text(
+                        '시간제',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[700],
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(Icons.chevron_right,
+                          size: 16, color: Colors.grey[700]),
+                    ],
+                  ),
+                ),
+
+                const Spacer(),
+
+                // 시작제 버튼
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.blue[50],
+                    borderRadius: BorderRadius.circular(50),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.watch_later_outlined,
+                          size: 16, color: Colors.blue[700]),
+                      const SizedBox(width: 4),
+                      Text(
+                        '시간제',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.blue[700],
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 16),
+
+            // 환자 이름 행
+            Row(
+              children: [
+                const Icon(Icons.person_outline,
+                    size: 20, color: Colors.black54),
+                const SizedBox(width: 8),
                 Text(
-                  request['careType'],
+                  care['patientName'],
                   style: const TextStyle(
-                    fontSize: 16,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.orange[50],
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    request['status'],
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.orange[800],
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
               ],
             ),
-          ),
 
-          // 카드 내용
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            const SizedBox(height: 12),
+
+            // 날짜
+            Row(
               children: [
-                _buildInfoRow(Icons.location_on_outlined, request['location']),
-                const SizedBox(height: 12),
-                _buildInfoRow(
-                  Icons.person_outline,
-                  '${request['patientName']} (${request['patientAge']}세, ${request['patientGender']})',
-                ),
-                const SizedBox(height: 12),
-                _buildInfoRow(
-                  Icons.calendar_today_outlined,
-                  '${request['startDate']} ~ ${request['endDate']}',
-                ),
-                const SizedBox(height: 20),
-
-                // 버튼 행
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () {
-                          // 거절 처리
-                          Get.snackbar(
-                            '알림',
-                            '간병 요청을 거절했습니다.',
-                            snackPosition: SnackPosition.BOTTOM,
-                          );
-                        },
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          side: const BorderSide(color: Colors.black),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: const Text(
-                          '거절하기',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          // 수락 처리
-                          Get.snackbar(
-                            '알림',
-                            '간병 요청을 수락했습니다.',
-                            snackPosition: SnackPosition.BOTTOM,
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          backgroundColor: Colors.black,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: const Text(
-                          '수락하기',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildOngoingCareCard(Map<String, dynamic> care) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 카드 헤더
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: const BoxDecoration(
-              border: Border(
-                bottom: BorderSide(color: Color(0xFFEEEEEE), width: 1),
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
+                const Icon(Icons.calendar_today_outlined,
+                    size: 20, color: Colors.black54),
+                const SizedBox(width: 8),
                 Text(
-                  care['careType'],
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.green[50],
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    care['status'],
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.green[800],
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // 카드 내용
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildInfoRow(Icons.location_on_outlined, care['location']),
-                const SizedBox(height: 12),
-                _buildInfoRow(
-                  Icons.person_outline,
-                  '${care['patientName']} (${care['patientAge']}세, ${care['patientGender']})',
-                ),
-                const SizedBox(height: 12),
-                _buildInfoRow(
-                  Icons.calendar_today_outlined,
                   '${care['startDate']} ~ ${care['endDate']}',
-                ),
-                const SizedBox(height: 12),
-                _buildInfoRow(
-                  Icons.contacts_outlined,
-                  '보호자: ${care['guardianName']} (${care['guardianContact']})',
-                ),
-                const SizedBox(height: 20),
-
-                // 간병 노트 버튼
-                SizedBox(
-                  width: double.infinity,
-                  height: 46,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      // 간병 노트 작성 페이지로 이동
-                      Get.to(() => CareNoteWriteView(
-                            careId: care['careId'],
-                            patientName: care['patientName'],
-                          ));
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: const Text(
-                      '간병 노트 작성하기',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.white,
-                      ),
-                    ),
+                  style: const TextStyle(
+                    fontSize: 15,
+                    color: Colors.black87,
                   ),
                 ),
               ],
             ),
-          ),
-        ],
-      ),
-    );
-  }
 
-  Widget _buildInfoRow(IconData icon, String text) {
-    return Row(
-      children: [
-        Icon(
-          icon,
-          size: 18,
-          color: Colors.grey[600],
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Text(
-            text,
-            style: const TextStyle(
-              fontSize: 14,
-              color: Colors.black87,
+            const SizedBox(height: 8),
+
+            // 시간
+            const Row(
+              children: [
+                Icon(Icons.access_time, size: 20, color: Colors.black54),
+                SizedBox(width: 8),
+                Text(
+                  '07:35 ~ 20:35',
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: Colors.black87,
+                  ),
+                ),
+              ],
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
+
+            const SizedBox(height: 20),
+
+            // 간병 노트 버튼
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    // 간병 노트 작성 페이지로 이동
+                    Get.to(() => CareNoteWriteView(
+                          careId: care['careId'],
+                          patientName: care['patientName'],
+                        ));
+                  },
+                  style: ElevatedButton.styleFrom(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    backgroundColor: Colors.black,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  child: const Row(
+                    children: [
+                      Icon(Icons.edit_note, size: 18, color: Colors.white),
+                      SizedBox(width: 4),
+                      Text(
+                        '간병노트 보기',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }
