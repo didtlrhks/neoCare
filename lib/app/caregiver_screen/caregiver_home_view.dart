@@ -68,29 +68,6 @@ class _CaregiverHomeViewState extends State<CaregiverHomeView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: const Text(
-          '네오케어 간병인',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 18,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined, color: Colors.black),
-            onPressed: () {
-              setState(() {
-                _selectedIndex = 2;
-              });
-            },
-          ),
-        ],
-      ),
       body: _pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
@@ -137,101 +114,130 @@ class _HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 프로필 요약 정보
-          _buildProfileSummary(),
-
-          const SizedBox(height: 16),
-
-          // 새로운 간병 요청 탭
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: ElevatedButton(
+    return Column(
+      children: [
+        AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          title: const Text(
+            '네오케어 간병인',
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 18,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          centerTitle: true,
+          actions: [
+            IconButton(
+              icon:
+                  const Icon(Icons.notifications_outlined, color: Colors.black),
               onPressed: () {
-                // 간병 요청 작성 페이지로 이동
+                // 알림 페이지로 이동
               },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF6960AD),
-                foregroundColor: Colors.white,
-                minimumSize: const Size(double.infinity, 60),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                elevation: 0,
-              ),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.edit_note, size: 28, color: Colors.white),
-                      SizedBox(width: 10),
-                      Text(
-                        '간병요청작성',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
+            ),
+          ],
+        ),
+        Expanded(
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 프로필 요약 정보
+                _buildProfileSummary(),
+
+                const SizedBox(height: 16),
+
+                // 새로운 간병 요청 탭
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      // 간병 요청 작성 페이지로 이동
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF6960AD),
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size(double.infinity, 60),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                    ],
+                      elevation: 0,
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.edit_note,
+                                size: 28, color: Colors.white),
+                            SizedBox(width: 10),
+                            Text(
+                              '간병요청작성',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Icon(Icons.arrow_forward_ios),
+                      ],
+                    ),
                   ),
-                  Icon(Icons.arrow_forward_ios),
-                ],
-              ),
+                ),
+
+                const SizedBox(height: 30),
+
+                // 진행 중인 간병 섹션
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: Text(
+                    '진행 중인 간병',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 15),
+
+                // 진행 중인 간병 카드
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: GestureDetector(
+                    onTap: () {
+                      // 진행 중인 간병 상세 페이지로 이동
+                      Get.to(() => const CareNoteWriteView(
+                            careId: '3',
+                            patientName: '이영희',
+                          ));
+                    },
+                    child: _buildOngoingCareCardNew({
+                      'careId': '3',
+                      'location': '서울시 송파구 잠실동',
+                      'patientName': '이영희',
+                      'patientAge': 72,
+                      'patientGender': '여성',
+                      'careType': '24시간 간병',
+                      'startDate': '2024-04-25',
+                      'endDate': '2024-05-05',
+                      'status': '진행 중',
+                      'guardianName': '이진수',
+                      'guardianContact': '010-1234-5678',
+                    }),
+                  ),
+                ),
+
+                const SizedBox(height: 30),
+
+                const SizedBox(height: 80), // 바텀 네비게이션 여백
+              ],
             ),
           ),
-
-          const SizedBox(height: 30),
-
-          // 진행 중인 간병 섹션
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20),
-            child: Text(
-              '진행 중인 간병',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 15),
-
-          // 진행 중인 간병 카드
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: GestureDetector(
-              onTap: () {
-                // 진행 중인 간병 상세 페이지로 이동
-                Get.to(() => const CareNoteWriteView(
-                      careId: '3',
-                      patientName: '이영희',
-                    ));
-              },
-              child: _buildOngoingCareCardNew({
-                'careId': '3',
-                'location': '서울시 송파구 잠실동',
-                'patientName': '이영희',
-                'patientAge': 72,
-                'patientGender': '여성',
-                'careType': '24시간 간병',
-                'startDate': '2024-04-25',
-                'endDate': '2024-05-05',
-                'status': '진행 중',
-                'guardianName': '이진수',
-                'guardianContact': '010-1234-5678',
-              }),
-            ),
-          ),
-
-          const SizedBox(height: 30),
-
-          const SizedBox(height: 80), // 바텀 네비게이션 여백
-        ],
-      ),
+        ),
+      ],
     );
   }
 

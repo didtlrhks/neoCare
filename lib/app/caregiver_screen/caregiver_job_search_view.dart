@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'guardian_detail_view.dart';
 
 class CaregiverJobSearchView extends StatelessWidget {
   const CaregiverJobSearchView({super.key});
@@ -7,7 +9,16 @@ class CaregiverJobSearchView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('일감찾기'),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        title: const Text(
+          '일감찾기',
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 18,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
         centerTitle: true,
       ),
       body: ListView.builder(
@@ -71,12 +82,24 @@ class CaregiverJobSearchView extends StatelessWidget {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Get.to(() => const GuardianDetailView());
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blue,
                         foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
-                      child: const Text('지원하기'),
+                      child: const Text(
+                        '지원하기',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
                 ],
