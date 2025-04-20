@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'edit_profile_view.dart';
+import 'settlement_history_view.dart';
 
 class CaregiverProfileView extends StatelessWidget {
   const CaregiverProfileView({super.key});
@@ -187,7 +188,9 @@ class CaregiverProfileView extends StatelessWidget {
             _buildMenuButton(
               icon: Icons.credit_card,
               title: '정산내역',
-              onTap: () {},
+              onTap: () {
+                Get.to(() => const SettlementHistoryView());
+              },
             ),
             _buildMenuButton(
               icon: Icons.notifications_none,
