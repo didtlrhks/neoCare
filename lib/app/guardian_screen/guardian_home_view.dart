@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../models/guardian_model.dart';
+import '../controllers/guardian_controller.dart';
 import 'care_request_view.dart';
 import 'care_detail_view.dart';
 import 'progress_care_view.dart';
@@ -18,24 +20,20 @@ class GuardianHomeView extends StatefulWidget {
 }
 
 class _GuardianHomeViewState extends State<GuardianHomeView> {
-  int _currentIndex = 0;
-  Map<String, dynamic>? _careData;
-
-  // 사용자 이름을 저장하는 변수
-  final RxString userName = '김네오'.obs;
+  late final GuardianController controller;
 
   @override
   void initState() {
     super.initState();
-    _careData = widget.careData ?? Get.arguments;
+    // 이미 초기화된 컨트롤러를 가져옵니다
+    controller = Get.find<GuardianController>();
 
-    // 새로운 간병 요청이 있으면 정적 리스트에 추가
-    if (_careData != null && (_careData!['isActive'] == true)) {
-      _addCareRequest(_careData!);
+    if (widget.careData != null && (widget.careData!['isActive'] == true)) {
+      controller.addCareRequest(widget.careData!);
     }
 
     // 디버그 메시지를 통해 요청 데이터 확인
-    debugPrint('initState - _careData: $_careData');
+    debugPrint('initState - _careData: ${widget.careData}');
     debugPrint(
         'initState - allCareRequests: ${GuardianHomeView.allCareRequests.length}');
   }
@@ -123,50 +121,49 @@ class _GuardianHomeViewState extends State<GuardianHomeView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[100],
-      appBar: AppBar(
-        title: const Text('NEO CARE',
-            style: TextStyle(fontWeight: FontWeight.bold)),
-        centerTitle: true,
+    return GetBuilder<GuardianController>(
+      init: controller, // 여기에 컨트롤러를 명시적으로 지정
+      builder: (controller) => Scaffold(
         backgroundColor: Colors.grey[100],
-        elevation: 0,
-      ),
-      body: _buildCurrentView(),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: Colors.black,
-        unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: '홈',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.assignment),
-            label: '간병인요청',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.notifications_none),
-            label: '알림',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            label: '내정보',
-          ),
-        ],
+        appBar: AppBar(
+          title: const Text('NEO CARE',
+              style: TextStyle(fontWeight: FontWeight.bold)),
+          centerTitle: true,
+          backgroundColor: Colors.grey[100],
+          elevation: 0,
+        ),
+        body: _buildCurrentView(),
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: controller.currentIndex,
+          onTap: controller.changeIndex,
+          type: BottomNavigationBarType.fixed,
+          selectedItemColor: Colors.black,
+          unselectedItemColor: Colors.grey,
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: '홈',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.assignment),
+              label: '간병인요청',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.notifications_none),
+              label: '알림',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person_outline),
+              label: '내정보',
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildCurrentView() {
-    switch (_currentIndex) {
+    switch (controller.currentIndex) {
       case 0:
         return _buildHomeView();
       case 1:
@@ -276,24 +273,12 @@ class _GuardianHomeViewState extends State<GuardianHomeView> {
   }
 
   Widget _buildCareRequestListView() {
-    final bool hasActiveRequests = GuardianHomeView.allCareRequests.isNotEmpty;
-
-    debugPrint(
-        '_buildCareRequestListView - 간병 요청 수: ${GuardianHomeView.allCareRequests.length}');
-    for (int i = 0; i < GuardianHomeView.allCareRequests.length; i++) {
-      final id = GuardianHomeView.allCareRequests[i]['requestId'] ?? '요청 ID 없음';
-      debugPrint('요청 $i: $id');
-    }
+    final careRequests = controller.guardian.careRequests;
+    final bool hasActiveRequests = careRequests.isNotEmpty;
 
     // 요청 목록을 시간 역순으로 정렬 (최신순)
-    final sortedRequests =
-        List<Map<String, dynamic>>.from(GuardianHomeView.allCareRequests);
-    sortedRequests.sort((a, b) {
-      final idA = a['requestId']?.toString() ?? '';
-      final idB = b['requestId']?.toString() ?? '';
-      // ID가 타임스탬프 기반이므로 역순 정렬하면 최신 요청이 위로 올라옴
-      return idB.compareTo(idA);
-    });
+    final sortedRequests = List<CareRequest>.from(careRequests);
+    sortedRequests.sort((a, b) => b.requestId.compareTo(a.requestId));
 
     return SingleChildScrollView(
       child: Column(
@@ -313,17 +298,16 @@ class _GuardianHomeViewState extends State<GuardianHomeView> {
           const SizedBox(height: 20),
           if (hasActiveRequests)
             ...(sortedRequests
-                .map((careData) => Padding(
+                .map((careRequest) => Padding(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 20, vertical: 10),
                       child: GestureDetector(
                         onTap: () {
-                          // 클릭 시 상세 페이지로 이동
                           Get.to(() => CareDetailView(
-                                requestId: careData['requestId'] ?? '',
+                                requestId: careRequest.requestId,
                               ));
                         },
-                        child: _buildActiveCareCard(careData),
+                        child: _buildActiveCareCard(careRequest),
                       ),
                     ))
                 .toList())
@@ -360,12 +344,8 @@ class _GuardianHomeViewState extends State<GuardianHomeView> {
   }
 
   Widget _buildNotificationView() {
-    // 자동/수동 설정을 위한 상태 변수
-    final RxBool isAutoDeleteEnabled = true.obs;
-
     return Column(
       children: [
-        // 상단 알림 설정 안내 부분
         Container(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -382,30 +362,27 @@ class _GuardianHomeViewState extends State<GuardianHomeView> {
                     ),
                   ),
                   const Spacer(),
-                  // 자동/수동 토글 버튼
-                  Obx(() => Row(
-                        children: [
-                          Text(
-                            isAutoDeleteEnabled.value ? '자동' : '수동',
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w500,
-                              color: isAutoDeleteEnabled.value
-                                  ? Colors.teal[600]
-                                  : Colors.grey[600],
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Switch(
-                            value: isAutoDeleteEnabled.value,
-                            onChanged: (value) {
-                              isAutoDeleteEnabled.value = value;
-                            },
-                            activeColor: Colors.teal[600],
-                            activeTrackColor: Colors.teal[100],
-                          ),
-                        ],
-                      )),
+                  Row(
+                    children: [
+                      Text(
+                        controller.isAutoDeleteEnabled ? '자동' : '수동',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                          color: controller.isAutoDeleteEnabled
+                              ? Colors.teal[600]
+                              : Colors.grey[600],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Switch(
+                        value: controller.isAutoDeleteEnabled,
+                        onChanged: (value) => controller.toggleAutoDelete(),
+                        activeColor: Colors.teal[600],
+                        activeTrackColor: Colors.teal[100],
+                      ),
+                    ],
+                  ),
                 ],
               ),
               const SizedBox(height: 12),
@@ -425,10 +402,10 @@ class _GuardianHomeViewState extends State<GuardianHomeView> {
                             text: '알림 설정이 ',
                           ),
                           TextSpan(
-                            text: isAutoDeleteEnabled.value ? '자동' : '수동',
+                            text: controller.isAutoDeleteEnabled ? '자동' : '수동',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              color: isAutoDeleteEnabled.value
+                              color: controller.isAutoDeleteEnabled
                                   ? Colors.teal[600]
                                   : Colors.grey[800],
                             ),
@@ -656,7 +633,7 @@ class _GuardianHomeViewState extends State<GuardianHomeView> {
 
                   // 사용자 이름
                   Obx(() => Text(
-                        userName.value,
+                        controller.guardian.name,
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -681,10 +658,8 @@ class _GuardianHomeViewState extends State<GuardianHomeView> {
                     onPressed: () {
                       // 프로필 수정 화면으로 이동
                       Get.to(() => NameChangeView(
-                            initialName: userName.value,
-                            onNameChanged: (newName) {
-                              userName.value = newName;
-                            },
+                            initialName: controller.guardian.name,
+                            onNameChanged: controller.updateUserName,
                           ));
                     },
                     style: OutlinedButton.styleFrom(
@@ -1007,28 +982,7 @@ class _GuardianHomeViewState extends State<GuardianHomeView> {
     );
   }
 
-  Widget _buildActiveCareCard(Map<String, dynamic> careData) {
-    // 보호자 정보
-    final String patientGender = careData['patientInfo']?['gender'] ?? '';
-
-    // 요청 ID
-    final String requestId = careData['requestId'] ?? '요청 ID 없음';
-
-    // 기간 정보
-    final String? startDate = careData['startDate'];
-    final String? endDate = careData['endDate'];
-    final String dateRange = '$startDate  ~  $endDate';
-
-    // 시간 정보
-    final String? startTime = careData['startTime'];
-    final String? endTime = careData['endTime'];
-    final String timeRange = '$startTime  ~  $endTime';
-
-    // 간병 타입
-    final String careType = careData['careType'] ?? '단순간병';
-
-    debugPrint('카드 생성 - ID: $requestId, 유형: $careType');
-
+  Widget _buildActiveCareCard(CareRequest careRequest) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -1061,7 +1015,7 @@ class _GuardianHomeViewState extends State<GuardianHomeView> {
                       Icon(Icons.refresh, size: 16, color: Colors.grey[700]),
                       const SizedBox(width: 4),
                       Text(
-                        '시간제',
+                        careRequest.careType,
                         style: TextStyle(
                           fontSize: 14,
                           color: Colors.grey[700],
@@ -1074,12 +1028,9 @@ class _GuardianHomeViewState extends State<GuardianHomeView> {
                     ],
                   ),
                 ),
-
                 const Spacer(),
-
-                // 요청 ID를 짧게 표시
                 Text(
-                  '요청번호: ${requestId.length > 4 ? requestId.substring(requestId.length - 4) : requestId}',
+                  '요청번호: ${careRequest.requestId.substring(careRequest.requestId.length - 4)}',
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.grey[500],
@@ -1094,7 +1045,7 @@ class _GuardianHomeViewState extends State<GuardianHomeView> {
                     size: 20, color: Colors.black54),
                 const SizedBox(width: 8),
                 Text(
-                  careType,
+                  careRequest.careType,
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -1110,7 +1061,9 @@ class _GuardianHomeViewState extends State<GuardianHomeView> {
                   ),
                   child: Center(
                     child: Icon(
-                      patientGender == '남자' ? Icons.man : Icons.woman,
+                      careRequest.patientInfo.gender == '남자'
+                          ? Icons.man
+                          : Icons.woman,
                       size: 40,
                       color: Colors.grey[600],
                     ),
@@ -1125,7 +1078,7 @@ class _GuardianHomeViewState extends State<GuardianHomeView> {
                     size: 20, color: Colors.black54),
                 const SizedBox(width: 8),
                 Text(
-                  dateRange,
+                  '${careRequest.startDate}  ~  ${careRequest.endDate}',
                   style: const TextStyle(
                     fontSize: 15,
                     color: Colors.black87,
@@ -1139,7 +1092,7 @@ class _GuardianHomeViewState extends State<GuardianHomeView> {
                 const Icon(Icons.access_time, size: 20, color: Colors.black54),
                 const SizedBox(width: 8),
                 Text(
-                  timeRange,
+                  '${careRequest.startTime}  ~  ${careRequest.endTime}',
                   style: const TextStyle(
                     fontSize: 15,
                     color: Colors.black87,
@@ -1147,7 +1100,6 @@ class _GuardianHomeViewState extends State<GuardianHomeView> {
                 ),
               ],
             ),
-            // 상세 보기 안내
             const SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,

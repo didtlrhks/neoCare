@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'guardian_screen/guardian_home_view.dart';
 import 'caregiver_screen/caregiver_home_view.dart';
+import 'controllers/guardian_controller.dart';
 
 class WelcomeView extends StatelessWidget {
   const WelcomeView({super.key});
@@ -31,8 +32,9 @@ class WelcomeView extends StatelessWidget {
                 iconColor: Colors.orange.shade400,
                 imagePath: 'assets/images/carrot.png',
                 onTap: () {
-                  // 보호자 화면으로 이동
-                  Get.off(() => const GuardianHomeView());
+                  // 보호자 화면으로 이동하기 전에 컨트롤러 초기화
+                  Get.put(GuardianController());
+                  Get.to(() => const GuardianHomeView());
                 },
               ),
               const Padding(
@@ -47,7 +49,7 @@ class WelcomeView extends StatelessWidget {
                 imagePath: 'assets/images/carrot_blue.png',
                 onTap: () {
                   // 간병인 화면으로 이동
-                  Get.off(() => const CaregiverHomeView());
+                  Get.to(() => const CaregiverHomeView());
                 },
               ),
               const Spacer(),
