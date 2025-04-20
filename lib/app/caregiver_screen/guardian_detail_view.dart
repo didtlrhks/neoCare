@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'write_estimate_view.dart';
 
 class GuardianDetailView extends StatelessWidget {
   const GuardianDetailView({super.key});
@@ -163,7 +164,7 @@ class GuardianDetailView extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: ElevatedButton(
             onPressed: () {
-              // 지원하기 로직
+              Get.to(() => const WriteEstimateView());
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.black,
